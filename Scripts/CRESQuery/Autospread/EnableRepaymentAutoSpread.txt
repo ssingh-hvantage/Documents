@@ -1,0 +1,4 @@
+--AS Reap
+exec [dbo].[usp_UpdateAutoRepayDataFromBackshopProduction] '15-0461','B0E6697B-3534-4C09-BE0A-04473401AB93'
+
+Update cre.deal set EnableAutoSpreadRepayments = 0 where credealid = '15-0461'

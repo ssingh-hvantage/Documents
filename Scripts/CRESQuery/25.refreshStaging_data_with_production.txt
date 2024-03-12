@@ -1,0 +1,26 @@
+Refresh Staging data with Production
+Calc all loans
+Refresh data warehouse until 0,0:
+dw.usp_deltajob
+Refresh Integration data with Production
+Calc all loans
+Run queries( in different tabs, after staging is refreshed ):
+exec [dbo].[usp_ImportStagingDataIntoIntegration]
+exec [dbo].[usp_ImportProductionDataIntoIntegration]
+Refresh data warehouse until 0,0:
+dw.usp_deltajob
+
+
+
+---------------------------------------------
+Refresh Staging data with Production
+Calc all loans
+Refresh data warehouse until 0,0:
+    dw.usp_deltajob
+Refresh Integration data with Production
+Calc all loans
+Run queries( in different tabs, after staging is refreshed ):
+    exec [dbo].[usp_ImportStagingDataIntoIntegration]
+    exec [dbo].[usp_ImportProductionDataIntoIntegration]
+Refresh data warehouse until 0,0:
+    dw.usp_deltajob

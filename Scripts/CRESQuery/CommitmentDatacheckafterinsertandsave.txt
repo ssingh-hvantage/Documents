@@ -1,0 +1,10 @@
+https://integrationcres4api.azurewebsites.net/api/deal/calcCommitment?DealId=C7A300A5-33FF-42C9-9806-7D94D58F8010
+
+
+
+
+https://qacres4api.azurewebsites.net/api/deal/calcCommitment?DealId=B680C929-7189-471B-8E6E-DD84B0806E9C
+
+
+Select *  FROM CRE.NoteAdjustedCommitmentMaster WHERE DealID =   'B680C929-7189-471B-8E6E-DD84B0806E9C'
+Select * FROM CRE.NoteAdjustedCommitmentDetail WHERE DealID =  'B680C929-7189-471B-8E6E-DD84B0806E9C' 

@@ -1,0 +1,95 @@
+Declare @Column nvarchar(256)=(select top 1 l.Name from core.Lookup  l inner join core.AnalysisParameter ap on l.lookupid=ap.MaturityScenarioOverrideID   
+inner join core.Analysis a on a.AnalysisID=ap.AnalysisID where a.StatusID=(select LookupID from core.Lookup where ParentID =2 and  Name = 'Y'))  
+
+select ActualPayoffDate,
+closingdate,
+case when n.ActualPayoffDate is not null then n.ActualPayoffDate	
+				  when (select SelectedMaturityDate from core.Maturity where EventID=
+(select max(EventID) from core.Event where eventtypeid=11 and AccountID=(select Account_AccountID from cre.note where noteid=n.noteid))
+) >getdate() or (n.ExtendedMaturityScenario1 is  null and n.ExtendedMaturityScenario2 is  null and n.ExtendedMaturityScenario3 is  null and n.FullyExtendedMaturityDate is null)
+ then  (select SelectedMaturityDate from core.Maturity where EventID=
+(select max(EventID) from core.Event where eventtypeid=11 and AccountID=(select Account_AccountID from cre.note where noteid=n.noteid))
+)  else
+case when  n.ExtendedMaturityScenario1>GETDATE() or (n.ExtendedMaturityScenario2 is  null and n.ExtendedMaturityScenario3 is  null and n.FullyExtendedMaturityDate is null) then n.ExtendedMaturityScenario1 else
+case when n.ExtendedMaturityScenario2 >GETDATE() or (n.ExtendedMaturityScenario3 is  null and n.FullyExtendedMaturityDate is null) then n.ExtendedMaturityScenario2 else
+case when  n.ExtendedMaturityScenario3 >GETDATE() or (n.FullyExtendedMaturityDate is null) then  n.ExtendedMaturityScenario3 else
+--case when  n.ExtendedMaturityScenario3 >GETDATE() then  n.FullyExtendedMaturityDate else
+ n.FullyExtendedMaturityDate end  --end
+ end end end as Maturity,
+ isnull(n.ActualPayoffDate, isnull(  
+case when @Column='Initial or Actual Payoff Date' then n.ActualPayoffDate   
+when @Column='Expected Maturity Date' then n.ExpectedMaturityDate   
+when @Column='Extended Maturity Date #1' then n.ExtendedMaturityScenario1   
+when @Column='Extended Maturity Date #2' then n.ExtendedMaturityScenario2   
+when @Column='Extended Maturity Date #3' then n.ExtendedMaturityScenario3   
+when @Column='Open Prepayment Date' then n.OpenPrepaymentDate   
+when @Column='Fully Extended Maturity Date' then n.FullyExtendedMaturityDate end,  
+  
+(Select TOP 1 mat.[SelectedMaturityDate]  
+  from [CORE].Maturity mat  
+  INNER JOIN [CORE].[Event] e on e.EventID = mat.EventId  
+  INNER JOIN (Select   
+  (Select AccountID from [CORE].[Account] ac where ac.AccountID = n.Account_AccountID) AccountID ,  
+  MAX(EffectiveStartDate) EffectiveStartDate,EventTypeID from [CORE].[Event] eve  
+  INNER JOIN [CRE].[Note] n ON n.Account_AccountID = eve.AccountID  
+  INNER JOIN [CORE].[Account] acc ON acc.AccountID = n.Account_AccountID  
+  where EventTypeID = (Select LookupID from CORE.[Lookup] where Name = 'Maturity')  
+  and acc.AccountID = n.Account_AccountID  
+  GROUP BY n.Account_AccountID,EventTypeID  
+  ) sEvent  
+  ON sEvent.AccountID = e.AccountID and e.EffectiveStartDate = sEvent.EffectiveStartDate  and e.EventTypeID = sEvent.EventTypeID)  
+  
+)) AS currentSelectedMaturityDate, 
+
+ (Select count(FF.Date) from core.FundingSchedule FF
+inner join core.Event e on e.EventID = FF.EventId
+inner join core.Account acc on acc.AccountID = e.AccountID
+where e.EventTypeID = 10 and e.StatusID = 1
+and acc.AccountID = n.account_accountid) FF,
+
+(Select count(AM.Date) from core.AmortSchedule  AM
+inner join core.Event e on e.EventID = AM.EventId
+inner join core.Account acc on acc.AccountID = e.AccountID
+where e.EventTypeID = 19 and e.StatusID = 1
+and acc.AccountID = n.account_accountid) am,
+
+(Select count(fcs.Date) from core.FeeCouponStripReceivable  fcs
+inner join core.Event e on e.EventID = fcs.EventId
+inner join core.Account acc on acc.AccountID = e.AccountID
+where e.EventTypeID = 20 --and e.StatusID = 1
+and acc.AccountID = n.account_accountid) feecoupon,
+
+(Select count(rss.Date) from Core.RateSpreadSchedule rss
+inner join core.Event e on e.EventID = rss.EventId
+inner join core.Account acc on acc.AccountID = e.AccountID
+where e.EventTypeID = 14 and e.StatusID = 1
+and acc.AccountID = n.account_accountid) rss,
+ 
+ (Select count(rss.StartDate) from Core.PrepayAndAdditionalFeeSchedule rss
+inner join core.Event e on e.EventID = rss.EventId
+inner join core.Account acc on acc.AccountID = e.AccountID
+where e.EventTypeID = 13 and e.StatusID = 1
+and acc.AccountID = n.account_accountid) prepay,
+
+( Select count(rss.StartDate) from Core.StrippingSchedule rss
+inner join core.Event e on e.EventID = rss.EventId
+inner join core.Account acc on acc.AccountID = e.AccountID
+where e.EventTypeID = 16 and e.StatusID = 1
+and acc.AccountID = n.account_accountid) strip,
+ 
+ (Select count(rss.Date) from Core.PIKScheduleDetail rss
+
+inner join core.Event e on e.EventID = rss.EventId
+inner join core.Account acc on acc.AccountID = e.AccountID
+where e.EventTypeID = 17 and e.StatusID = 1
+
+and acc.AccountID = n.account_accountid) pik,
+
+ (Select count(piks.StartDate) from Core.[PIKSchedule] piks
+inner join core.Event e on e.EventID = piks.EventId
+inner join core.Account acc on acc.AccountID = e.AccountID
+where e.EventTypeID = 12 
+and acc.AccountID = n.account_accountid) PIKSchedule,
+
+ * from cre.Note n
+ order by  currentSelectedMaturityDate asc

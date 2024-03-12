@@ -1,0 +1,21 @@
+-- Average daily balance and InterestPast30/60/90 days
+SELECT DealName, CreDealID, CreNoteID, PeriodEndDate, AverageDailyBalance, InterestPastDue30, InterestPastDue60, InterestPastDue90, InterestPastDue90Plus
+FROM cre.NotePeriodicCalc npc
+left join cre.Note n on n.noteID=npc.NoteID
+left join cre.Deal d on d.DealID=n.DealID
+left join core.Account acc on acc.AccountID=n.Account_AccountID
+WHERE d.IsDeleted<>1 and acc.IsDeleted<>1 and Month is not NULL and AnalysisID='C10F3372-0FC2-4861-A9F5-148F1F80804F'
+and CREDealID='21-0861' and PeriodEndDate='2023-07-31'
+ORDER BY DealName, CRENoteID, PeriodEndDate
+
+ 
+
+-- 90days daily balance
+Select CreNoteID, PeriodEndDate,  EndingBalance
+FROM cre.NotePeriodicCalc npc
+left join cre.Note n on n.noteID=npc.NoteID
+left join cre.Deal d on d.DealID=n.DealID
+left join core.Account acc on acc.AccountID=n.Account_AccountID
+WHERE d.IsDeleted<>1 and acc.IsDeleted<>1  and AnalysisID='C10F3372-0FC2-4861-A9F5-148F1F80804F'
+and CREDealID='21-0861' --and PeriodEndDate='2023-07-31'
+ORDER BY CRENoteID, PeriodEndDate

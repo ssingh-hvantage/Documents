@@ -1,0 +1,57 @@
+https://integrationcres4calculator.azurewebsites.net/api/generateautomation/automaticallykickoutmonthendfundings
+
+
+https://integrationcres4api.azurewebsites.net/api/note/CheckAutomationEmail?type=all
+
+amort
+
+nextmonth
+
+-------- to get deals for which move next funding will work
+
+
+ Select distinct df.dealid  
+ from cre.dealfunding df  
+ Inner join cre.deal d on d.dealid = df.dealid  
+ where d.isdeleted <> 1 and df.applied <> 1 and df.comment is null  
+ and df.date >= CAST(DATEADD(DD,-(DAY(GETDATE() -1)), GETDATE()) as date) and df.date <= EOMONTH(getdate())  
+ and df.Amount > 0  
+ and df.purposeid in (318,320,519,520,581)  
+
+---------------------------------------------------------------
+-------- to get amortization on same date ---
+
+
+Select distinct df.dealid  
+ from cre.dealfunding df  
+ Inner join cre.deal d on d.dealid = df.dealid  
+ where d.isdeleted <> 1  
+ and df.applied <> 1   
+ and df.purposeid  = 351  ---'Amortization'  
+ and df.date = Cast(getdate() as date)  
+
+
+To queue all move next month funding
+
+https://integrationcres4calculator.azurewebsites.net/api/generateautomation/automaticallykickoutmonthendfundings
+
+ 
+
+To queue all amortization records
+
+https://integrationcres4calculator.azurewebsites.net/api/generateautomation/amortizationautowireconfirmnnpayday
+
+
+https://integrationcres4calculator.azurewebsites.net/api/generateautomation/CheckAutomation?DealID=859a243c-3eaa-4932-b0d1-03b51af30b20&&type=AmortizationAutoWire
+https://integrationcres4calculator.azurewebsites.net/api/generateautomation/CheckAutomation?DealID=44C53501-A61F-4EAF-A736-14E8CFD27F8B&&type=FundingMoveToNextMonth
+
+
+
+-------------------------------
+1.Flamingo Road Apartments-Funding as 5/24/2023
+2.Two West Delaware-5/24/2023 with comment
+3. Northstar ALTO Portfolio
+4.AirFlyte
+
+
+

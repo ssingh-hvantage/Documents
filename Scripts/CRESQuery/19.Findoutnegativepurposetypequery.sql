@@ -1,0 +1,2 @@
+//Query for find out Amortization or Negative purpose type in deal funding
+select * from Cre.DealFunding where PurposeID in  (select lookupid  from Core.Lookup where ParentID=50 and value ='Negative') order by dealid

@@ -1,0 +1,2 @@
+---AS funding
+Update cre.deal set enableautospread = 0 where credealid = '15-0461'

@@ -1,0 +1,6 @@
+Select DealName,CREDealID ,n.crenoteid,n.closingdate ,acc.name
+from cre.deal d
+inner join cre.note n on d.dealid=n.dealid 
+inner join core.Account acc on  acc.AccountID=n.account_accountid
+where CREDealID='18-1210'
+

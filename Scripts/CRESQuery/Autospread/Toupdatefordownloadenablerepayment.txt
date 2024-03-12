@@ -1,0 +1,1 @@
+update app.AppConfig set Value = 1 where [key]='AllowFundingDevData'
